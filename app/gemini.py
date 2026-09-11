@@ -11,7 +11,7 @@ def ask_gemini(message: str, history: list[dict]) -> str:
     if not api_key:
         raise RuntimeError("لم يتم العثور على GEMINI_API_KEY في ملف .env")
 
-    # بناء المحادثة بالـ interactions format (الطريقة الجديدة)
+    # بناء المحادثة بالـ interactions format
     contents = []
     for item in history:
         role = "model" if item["role"] == "model" else "user"
@@ -32,28 +32,27 @@ def ask_gemini(message: str, history: list[dict]) -> str:
         }
     }
 
-    # إرسال الـ system instruction كـ HTTP header
+    # إرسال الطلب مع ترميز UTF-8
     headers = {
-        "Content-Type": "application/json",
-        "System-Instruction": SYSTEM_INSTRUCTION
+        "Content-Type": "application/json; charset=utf-8",
     }
 
+    url = f"{GEMINI_URL}?key={api_key}"
+    
     response = requests.post(
-        f"{GEMINI_URL}?key={api_key}",
+        url,
         json=payload,
         headers=headers,
         timeout=60
     )
 
     if not response.ok:
-        error_detail = response.text[:400]
-        print(f"Gemini API Error {response.status_code}: {error_detail}")
-        raise RuntimeError(f"خطأ API: {response.status_code}")
+        raise RuntimeError(f"خطأ API {response.status_code}: {response.text[:200]}")
 
     data = response.json()
 
     try:
-        return data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError, TypeError):
-        print(f"Parse Error: {data}")
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return text
+    except (KeyError, IndexError, TypeError) as e:
         raise RuntimeError(f"استجابة غير صالحة من Gemini")
