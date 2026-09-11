@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pip install -r requirements.txt",
+  "devCommand": "python -m uvicorn app.main:app --reload",
+  "installCommand": "pip install -r requirements.txt",
+  "framework": "fastapi",
+  "regions": ["iad1"]
+}
