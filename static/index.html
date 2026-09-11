@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberGuard AI | مساعد الأمن السيبراني</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">🛡️</div>
+        <div>
+          <h1>CyberGuard AI</h1>
+          <span>مساعد الأمن السيبراني</span>
+        </div>
+      </div>
+
+      <div class="scope">
+        <strong>نطاق المشروع</strong>
+        <p>المساعد يجيب عن الأسئلة التعليمية المتعلقة بالأمن السيبراني فقط.</p>
+      </div>
+
+      <div class="topics">
+        <h3>أمثلة للمواضيع</h3>
+        <button data-q="ما هو الأمن السيبراني وما أهم أهدافه؟">مقدمة في الأمن السيبراني</button>
+        <button data-q="اشرح لي مفهوم SOC ودور محلل الأمن فيه">SOC</button>
+        <button data-q="ما الفرق بين التشفير المتماثل وغير المتماثل؟">التشفير</button>
+        <button data-q="اشرح لي SIEM بطريقة بسيطة">SIEM</button>
+        <button data-q="ما هي أشهر أنواع هجمات الويب وكيف نحمي التطبيقات منها؟">أمن الويب</button>
+      </div>
+
+      <button id="clearBtn" class="clear">مسح المحادثة</button>
+    </aside>
+
+    <section class="chat">
+      <header class="chat-header">
+        <div>
+          <h2>مساعدك التعليمي في الأمن السيبراني</h2>
+          <p>يعتمد على Gemini API مع حفظ سياق المحادثة.</p>
+        </div>
+        <span class="status"><i></i> متصل</span>
+      </header>
+
+      <div id="messages" class="messages">
+        <div class="message bot">
+          <div class="avatar">AI</div>
+          <div class="bubble">
+            <strong>مرحباً 👋</strong>
+            <p>أنا CyberGuard AI. اسألني عن أي موضوع في الأمن السيبراني وسأشرح لك بطريقة تعليمية مبسطة.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="typing" id="typing"><span></span><span></span><span></span></div>
+
+      <form id="chatForm" class="composer">
+        <textarea id="input" rows="1" placeholder="اكتب سؤالك في الأمن السيبراني..." required></textarea>
+        <button type="submit" aria-label="إرسال">➤</button>
+      </form>
+      <small class="note">المشروع تعليمي. لا تستخدم الشروحات ضد أنظمة لا تملك تصريحاً لاختبارها.</small>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
