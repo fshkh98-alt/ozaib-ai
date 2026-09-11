@@ -1,8 +1,8 @@
 from pathlib import Path
 import os
-import sqlite3
 import uuid
 from typing import Optional
+from datetime import datetime
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -15,34 +15,12 @@ from app.gemini import ask_gemini
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "chat_history.db"
 
 app = FastAPI(title="CyberGuard AI", version="1.0.0")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
-
-def db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def init_db():
-    conn = db()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id TEXT NOT NULL,
-            role TEXT NOT NULL,
-            content TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-
-init_db()
+# تخزين المحادثات في الذاكرة بدلاً من SQLite
+chat_histories: dict[str, list[dict]] = {}
 
 
 class ChatRequest(BaseModel):
@@ -56,28 +34,13 @@ class ChatResponse(BaseModel):
 
 
 def get_history(session_id: str, limit: int = 20):
-    conn = db()
-    rows = conn.execute(
-        """
-        SELECT role, content FROM messages
-        WHERE session_id = ?
-        ORDER BY id ASC
-        LIMIT ?
-        """,
-        (session_id, limit),
-    ).fetchall()
-    conn.close()
-    return [{"role": row["role"], "content": row["content"]} for row in rows]
+    return chat_histories.get(session_id, [])[-limit:]
 
 
 def save_message(session_id: str, role: str, content: str):
-    conn = db()
-    conn.execute(
-        "INSERT INTO messages (session_id, role, content) VALUES (?, ?, ?)",
-        (session_id, role, content),
-    )
-    conn.commit()
-    conn.close()
+    if session_id not in chat_histories:
+        chat_histories[session_id] = []
+    chat_histories[session_id].append({"role": role, "content": content})
 
 
 @app.get("/")
@@ -107,10 +70,7 @@ def chat(req: ChatRequest):
 
 @app.delete("/api/chat/{session_id}")
 def clear_chat(session_id: str):
-    conn = db()
-    conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
-    conn.commit()
-    conn.close()
+    chat_histories[session_id] = []
     return {"status": "cleared"}
 
 
