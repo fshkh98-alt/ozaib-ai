@@ -1,10 +1,10 @@
 import os
 import requests
 
-# استخدام نموذج gemini-2.0-flash-exp
+# استخدام نموذج gemini-1.5-flash المتوفر عالمياً
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.0-flash-exp:generateContent"
+    "gemini-1.5-flash:generateContent"
 )
 
 SYSTEM_INSTRUCTION = """أنت CyberGuard AI، شات بوت تعليمي متخصص في الأمن السيبراني. أجب بالعربية مع شرح واضح."""
@@ -24,7 +24,7 @@ def ask_gemini(message: str, history: list[dict]) -> str:
 
     payload = {
         "contents": contents,
-        "systemInstruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
+        "system_instruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
         "generationConfig": {"maxOutputTokens": 1200}
     }
 
@@ -39,7 +39,7 @@ def ask_gemini(message: str, history: list[dict]) -> str:
     if not response.ok:
         error_text = response.text[:500]
         print(f"Gemini API Error: {response.status_code} - {error_text}")
-        raise RuntimeError(f"خطأ في الاتصال: {response.status_code}")
+        raise RuntimeError(f"Gemini Error {response.status_code}: {error_text[:200]}")
 
     data = response.json()
 
@@ -47,4 +47,4 @@ def ask_gemini(message: str, history: list[dict]) -> str:
         return data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError, TypeError) as e:
         print(f"Parse Error: {data}")
-        raise RuntimeError(f"استجابة غير متوقعة: {data}")
+        raise RuntimeError(f"استجابة غير متوقعة")
