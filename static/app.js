@@ -17,8 +17,9 @@ function addMessage(text, role) {
   avatar.className = "avatar";
   avatar.textContent = role === "bot" ? "AI" : "أنت";
   const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  bubble.textContent = text;
+  bubble.className = "bubble markdown-body";
+  // تحويل Markdown لـ HTML
+  bubble.innerHTML = marked.parse(text);
   wrapper.append(avatar, bubble);
   messages.appendChild(wrapper);
   messages.scrollTop = messages.scrollHeight;
