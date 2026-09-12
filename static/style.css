@@ -281,15 +281,11 @@ body {
   display: flex;
   gap: 12px;
   animation: slideIn 0.3s ease;
+  direction: rtl;
 }
 
 .message.user {
   flex-direction: row-reverse;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .message-avatar {
@@ -303,6 +299,7 @@ body {
   font-size: 11px;
   font-weight: 600;
   flex-shrink: 0;
+  direction: ltr;
 }
 
 .message.bot .message-avatar {
@@ -323,6 +320,8 @@ body {
   line-height: 1.8;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  direction: auto;
+  unicode-bidi: embed;
 }
 
 .message.bot .message-bubble {
@@ -343,6 +342,8 @@ body {
   font-weight: 700;
   margin: 14px 0 8px;
   color: var(--text-primary);
+  direction: rtl;
+  text-align: right;
 }
 
 .message-bubble h1:first-child,
@@ -353,18 +354,24 @@ body {
 
 .message-bubble p {
   margin: 10px 0;
+  direction: rtl;
+  text-align: right;
 }
 
 .message-bubble ul,
 .message-bubble ol {
   margin: 10px 0;
   padding-right: 22px;
+  direction: rtl;
 }
 
 .message-bubble li {
   margin: 5px 0;
+  direction: rtl;
+  text-align: right;
 }
 
+/* Inline Code - LTR for programming */
 .message-bubble code {
   background: rgba(0, 0, 0, 0.3);
   padding: 2px 7px;
@@ -375,17 +382,11 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  direction: ltr;
+  unicode-bidi: embed;
 }
 
-.message-bubble code:hover {
-  background: rgba(0, 0, 0, 0.5);
-  color: #a5d6ff;
-}
-
-.message-bubble code:active {
-  transform: scale(0.96);
-}
-
+/* Code Blocks - Always LTR */
 .message-bubble pre {
   background: rgba(0, 0, 0, 0.4);
   padding: 14px;
@@ -394,6 +395,9 @@ body {
   margin: 12px 0;
   border: 1px solid var(--border-color);
   position: relative;
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: left;
 }
 
 .message-bubble pre::-webkit-scrollbar {
@@ -417,6 +421,8 @@ body {
   font-size: 12px;
   line-height: 1.6;
   cursor: text;
+  display: block;
+  text-align: left;
 }
 
 .message-bubble blockquote {
@@ -426,6 +432,7 @@ body {
   background: rgba(16, 163, 127, 0.08);
   color: var(--text-secondary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  direction: rtl;
 }
 
 .message-bubble strong {
@@ -442,6 +449,7 @@ body {
   text-decoration: underline;
 }
 
+/* Tables - RTL for Arabic */
 .message-bubble table {
   width: 100%;
   border-collapse: collapse;
@@ -449,6 +457,7 @@ body {
   font-size: 12px;
   overflow-x: auto;
   display: block;
+  direction: rtl;
 }
 
 .message-bubble th,
@@ -457,6 +466,7 @@ body {
   padding: 8px 12px;
   text-align: right;
   min-width: 100px;
+  direction: rtl;
 }
 
 .message-bubble th {
