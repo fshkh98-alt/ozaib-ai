@@ -25,13 +25,14 @@ function getMessagesFromLocal() {
   return saved ? JSON.parse(saved) : [];
 }
 
-// Copy Button Function
+// Copy Button Function (always visible)
 function createCopyButton(text) {
   const btn = document.createElement("button");
-  btn.className = "copy-btn";
+  btn.className = "copy-btn copy-btn-visible";
   btn.innerHTML = "📋";
-  btn.title = "نسخ الكود";
-  btn.addEventListener("click", async () => {
+  btn.title = "نسخ";
+  btn.addEventListener("click", async (e) => {
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(text);
       btn.innerHTML = "✓";
@@ -41,6 +42,30 @@ function createCopyButton(text) {
     }
   });
   return btn;
+}
+
+// Click on code to copy
+function makeCodeClickable(bubble) {
+  bubble.querySelectorAll("code").forEach(code => {
+    code.style.cursor = "pointer";
+    code.title = "انقر للنسخ";
+    
+    // Skip if already has click handler
+    if (code.dataset.clickCopyAdded) return;
+    code.dataset.clickCopyCreated = "true";
+    
+    code.addEventListener("click", async () => {
+      const text = code.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        // Show temporary feedback
+        code.style.color = "#7ee787";
+        setTimeout(() => code.style.color = "", 500);
+      } catch (err) {
+        console.error("فشل النسخ:", err);
+      }
+    });
+  });
 }
 
 // Highlight Code Function
@@ -75,7 +100,7 @@ function addMessage(text, role, save = true) {
   // Highlight code blocks
   highlightCode(bubble);
   
-  // Add copy buttons to code blocks
+  // Add copy buttons to pre blocks
   bubble.querySelectorAll("pre").forEach(pre => {
     const code = pre.querySelector("code");
     if (code) {
@@ -84,6 +109,9 @@ function addMessage(text, role, save = true) {
       pre.appendChild(btn);
     }
   });
+  
+  // Make inline code clickable to copy
+  makeCodeClickable(bubble);
   
   messageDiv.appendChild(avatar);
   messageDiv.appendChild(bubble);
@@ -124,6 +152,7 @@ function loadSavedMessages() {
     bubble.innerHTML = marked.parse(msg.text);
     
     highlightCode(bubble);
+    makeCodeClickable(bubble);
     
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(bubble);
