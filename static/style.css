@@ -12,12 +12,17 @@ body {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 280px 1fr;
-  min-height: 100vh;
+  height: 100vh;
   max-height: 100vh;
   overflow: hidden;
 }
-.sidebar {
-  background: rgba(15, 20, 30, 0.95);
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
   border-left: 1px solid rgba(255,255,255,0.08);
   padding: 20px;
   display: flex;
@@ -80,6 +85,7 @@ body {
   padding: 24px;
   display: flex; flex-direction: column; gap: 16px;
   scroll-behavior: smooth;
+  min-height: 0;
 }
 .message { display: flex; gap: 12px; max-width: 85%; animation: fadeIn 0.3s ease; }
 .message.user { align-self: flex-end; flex-direction: row-reverse; }
