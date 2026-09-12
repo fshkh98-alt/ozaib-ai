@@ -20,6 +20,24 @@ function getMessagesFromLocal() {
   return saved ? JSON.parse(saved) : [];
 }
 
+// دالة نسخ النص
+function createCopyButton(text, parent) {
+  const btn = document.createElement("button");
+  btn.className = "copy-btn";
+  btn.innerHTML = "📋";
+  btn.title = "نسخ";
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.innerHTML = "✓";
+      setTimeout(() => btn.innerHTML = "📋", 1500);
+    } catch (err) {
+      console.error("فشل النسخ:", err);
+    }
+  });
+  return btn;
+}
+
 function addMessage(text, role, save = true) {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${role}`;
@@ -29,6 +47,17 @@ function addMessage(text, role, save = true) {
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   bubble.innerHTML = marked.parse(text);
+
+  // إضافة زر نسخ للأكواد
+  bubble.querySelectorAll("pre").forEach(pre => {
+    const code = pre.querySelector("code");
+    if (code) {
+      const btn = createCopyButton(code.textContent, pre);
+      pre.style.position = "relative";
+      pre.appendChild(btn);
+    }
+  });
+
   wrapper.append(avatar, bubble);
   messages.appendChild(wrapper);
   messages.scrollTop = messages.scrollHeight;

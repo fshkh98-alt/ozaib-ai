@@ -305,17 +305,65 @@ body {
   border-collapse: collapse;
   margin: 8px 0;
   font-size: 12px;
+  overflow-x: auto;
+  display: block;
 }
 
 .bubble th, .bubble td {
   border: 1px solid #21262d;
   padding: 6px 8px;
   text-align: right;
+  min-width: 100px;
 }
 
 .bubble th {
   background: rgba(110, 118, 129, 0.1);
   color: #f0f6fc;
+}
+
+/* Pre and Code blocks - prevent overflow */
+.bubble pre {
+  background: rgba(22, 27, 34, 0.8);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+  border: 1px solid #21262d;
+  position: relative;
+}
+
+.bubble pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bubble pre::-webkit-scrollbar-track {
+  background: #161b22;
+  border-radius: 3px;
+}
+
+.bubble pre::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+/* Copy Button */
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(110, 118, 129, 0.2);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  opacity: 1;
+  background: rgba(110, 118, 129, 0.4);
 }
 
 /* Typing Animation */
