@@ -47,8 +47,10 @@ def ask_gemini(message: str, history: list[dict]) -> str:
         },
         "contents": contents,
         "generationConfig": {
-            "maxOutputTokens": 1500,
-            "temperature": 0.7
+            "maxOutputTokens": 4096,
+            "temperature": 0.7,
+            "topK": 40,
+            "topP": 0.95
         }
     }
 
