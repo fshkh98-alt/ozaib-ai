@@ -1,16 +1,21 @@
-const messages = document.getElementById("messages");
-const form = document.getElementById("chatForm");
+// DOM Elements
+const messagesContainer = document.getElementById("messages");
+const chatForm = document.getElementById("chatForm");
 const input = document.getElementById("input");
-const typing = document.getElementById("typing");
+const typingIndicator = document.getElementById("typing");
 const clearBtn = document.getElementById("clearBtn");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+const mobileToggle = document.getElementById("mobileToggle");
 
+// Session Management
 let sessionId = localStorage.getItem("cyberguard_session");
 if (!sessionId) {
   sessionId = crypto.randomUUID();
   localStorage.setItem("cyberguard_session", sessionId);
 }
 
-// حفظ واسترجاع المحادثة من localStorage
+// Local Storage Functions
 function saveMessagesToLocal(messages) {
   localStorage.setItem("cyberguard_messages", JSON.stringify(messages));
 }
@@ -20,12 +25,12 @@ function getMessagesFromLocal() {
   return saved ? JSON.parse(saved) : [];
 }
 
-// دالة نسخ النص
-function createCopyButton(text, parent) {
+// Copy Button Function
+function createCopyButton(text) {
   const btn = document.createElement("button");
   btn.className = "copy-btn";
   btn.innerHTML = "📋";
-  btn.title = "نسخ";
+  btn.title = "نسخ الكود";
   btn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(text);
@@ -38,14 +43,13 @@ function createCopyButton(text, parent) {
   return btn;
 }
 
+// Highlight Code Function
 function highlightCode(bubble) {
   bubble.querySelectorAll("pre code").forEach(block => {
-    // محاولة اكتشاف اللغة
     const classes = block.className.split(" ");
     const langClass = classes.find(c => c.startsWith("language-"));
     const lang = langClass ? langClass.replace("language-", "") : '';
     
-    // إذا اللغة غير موجودة أو غير مدعومة، حاول ن探测
     if (!lang || !hljs.getLanguage(lang)) {
       block.removeAttribute('class');
       hljs.highlightElement(block);
@@ -55,34 +59,40 @@ function highlightCode(bubble) {
   });
 }
 
+// Add Message to Chat
 function addMessage(text, role, save = true) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `message ${role}`;
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${role}`;
+  
   const avatar = document.createElement("div");
-  avatar.className = "avatar";
+  avatar.className = "message-avatar";
   avatar.textContent = role === "bot" ? "AI" : "أنت";
+  
   const bubble = document.createElement("div");
-  bubble.className = "bubble";
+  bubble.className = "message-bubble";
   bubble.innerHTML = marked.parse(text);
-
-  // تلوين الأكواد
+  
+  // Highlight code blocks
   highlightCode(bubble);
-
-  // إضافة زر نسخ للأكواد
+  
+  // Add copy buttons to code blocks
   bubble.querySelectorAll("pre").forEach(pre => {
     const code = pre.querySelector("code");
     if (code) {
-      const btn = createCopyButton(code.textContent, pre);
+      const btn = createCopyButton(code.textContent);
       pre.style.position = "relative";
       pre.appendChild(btn);
     }
   });
-
-  wrapper.append(avatar, bubble);
-  messages.appendChild(wrapper);
-  messages.scrollTop = messages.scrollHeight;
-
-  // حفظ الرسالة
+  
+  messageDiv.appendChild(avatar);
+  messageDiv.appendChild(bubble);
+  messagesContainer.appendChild(messageDiv);
+  
+  // Scroll to bottom
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  // Save message if needed
   if (save) {
     const messages = getMessagesFromLocal();
     messages.push({ role, text });
@@ -90,65 +100,72 @@ function addMessage(text, role, save = true) {
   }
 }
 
-// استرجاع المحادثة عند تحميل الصفحة
+// Load Saved Messages
 function loadSavedMessages() {
   const saved = getMessagesFromLocal();
+  
   if (saved.length === 0) {
-    // رسالة الترحيب
-    addMessage("**مرحباً 👋**\n\nأنا CyberGuard AI. اسألني عن أي موضوع في الأمن السيبراني وسأشرح لك بطريقة تعليمية مبسطة.", "bot", false);
+    // Welcome message
+    addMessage("**مرحباً! 👋**\n\nأنا **CyberGuard AI**، مساعدك التعليمي في مجال الأمن السيبراني.\n\nاسألني عن أي موضوع متعلق بـ:\n- أمن الشبكات\n- التشفير\n- البرمجيات الخبيثة\n- SOC و SIEM\n- أمان الويب\n- التحليل الجنائي الرقمي\n\nوسأشرح لك بشكل تعليمي مبسط.", "bot", false);
     return;
   }
-
-  // عرض جميع الرسائل المحفوظة
+  
+  // Load all saved messages
   saved.forEach(msg => {
-    const wrapper = document.createElement("div");
-    wrapper.className = `message ${msg.role}`;
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${msg.role}`;
+    
     const avatar = document.createElement("div");
-    avatar.className = "avatar";
+    avatar.className = "message-avatar";
     avatar.textContent = msg.role === "bot" ? "AI" : "أنت";
+    
     const bubble = document.createElement("div");
-    bubble.className = "bubble";
+    bubble.className = "message-bubble";
     bubble.innerHTML = marked.parse(msg.text);
     
-    // تلوين الأكواد للرسائل المحفوطة
     highlightCode(bubble);
     
-    wrapper.append(avatar, bubble);
-    messages.appendChild(wrapper);
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(bubble);
+    messagesContainer.appendChild(messageDiv);
   });
-  messages.scrollTop = messages.scrollHeight;
+  
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// تحميل الرسائل المحفوظة عند بدء الصفحة
-loadSavedMessages();
-
+// Send Message to API
 async function sendMessage(text) {
   addMessage(text, "user");
-  typing.style.display = "flex";
+  typingIndicator.style.display = "flex";
   input.disabled = true;
-  form.querySelector("button").disabled = true;
+  chatForm.querySelector(".send-btn").disabled = true;
 
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({session_id: sessionId, message: text})
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message: text })
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "حدث خطأ");
+    
+    if (!res.ok) {
+      throw new Error(data.detail || "حدث خطأ أثناء الاتصال");
+    }
+    
     addMessage(data.answer, "bot");
   } catch (err) {
-    addMessage("**خطأ**\n\nتعذر الحصول على الإجابة: " + err.message, "bot");
+    addMessage(`**خطأ**\n\n${err.message}`, "bot");
   } finally {
-    typing.style.display = "none";
+    typingIndicator.style.display = "none";
     input.disabled = false;
-    form.querySelector("button").disabled = false;
+    chatForm.querySelector(".send-btn").disabled = false;
     input.focus();
   }
 }
 
-form.addEventListener("submit", async (e) => {
+// Event Listeners
+chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = input.value.trim();
   if (!text) return;
@@ -159,20 +176,43 @@ form.addEventListener("submit", async (e) => {
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    form.requestSubmit();
+    chatForm.requestSubmit();
   }
 });
 
-document.querySelectorAll(".topics button").forEach(btn => {
+// Topic Buttons
+document.querySelectorAll(".topic-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     input.value = btn.dataset.q;
     input.focus();
+    
+    // Close sidebar on mobile
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.remove("active");
   });
 });
 
+// Clear Chat
 clearBtn.addEventListener("click", async () => {
-  await fetch(`/api/chat/${sessionId}`, {method: "DELETE"});
+  try {
+    await fetch(`/api/chat/${sessionId}`, { method: "DELETE" });
+  } catch (e) {
+    console.log("فشل مسح المحادثة من السيرفر");
+  }
+  
   localStorage.removeItem("cyberguard_messages");
-  messages.innerHTML = "";
-  addMessage("**تم مسح المحادثة**\n\nاطرح سؤالك الجديد في الأمن السيبراني.", "bot", false);
+  messagesContainer.innerHTML = "";
+  addMessage("**تم مسح المحادثة** 🔄\n\nابدأ محادثة جديدة في مجال الأمن السيبراني.", "bot", false);
 });
+
+// Mobile Sidebar Toggle
+function toggleSidebar() {
+  sidebar.classList.toggle("open");
+  sidebarOverlay.classList.toggle("active");
+}
+
+mobileToggle.addEventListener("click", toggleSidebar);
+sidebarOverlay.addEventListener("click", toggleSidebar);
+
+// Initialize
+loadSavedMessages();
