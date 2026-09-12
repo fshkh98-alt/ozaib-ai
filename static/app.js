@@ -113,6 +113,29 @@ function addMessage(text, role, save = true) {
   // Make inline code clickable to copy
   makeCodeClickable(bubble);
   
+  // Add copy buttons to tables (convert to CSV and copy)
+  bubble.querySelectorAll("table").forEach(table => {
+    const rows = table.querySelectorAll("tr");
+    let csv = "";
+    rows.forEach(row => {
+      const cells = row.querySelectorAll("th, td");
+      const rowData = [];
+      cells.forEach(cell => {
+        rowData.push(cell.textContent.trim());
+      });
+      csv += rowData.join(",") + "\n";
+    });
+    
+    const btn = createCopyButton(csv.trim());
+    btn.style.position = "absolute";
+    btn.style.top = "8px";
+    btn.style.left = "8px";
+    table.style.position = "relative";
+    table.style.paddingTop = "40px";
+    table.parentNode.style.position = "relative";
+    table.parentNode.insertBefore(btn, table);
+  });
+  
   messageDiv.appendChild(avatar);
   messageDiv.appendChild(bubble);
   messagesContainer.appendChild(messageDiv);
@@ -153,6 +176,29 @@ function loadSavedMessages() {
     
     highlightCode(bubble);
     makeCodeClickable(bubble);
+    
+    // Add copy buttons to tables
+    bubble.querySelectorAll("table").forEach(table => {
+      const rows = table.querySelectorAll("tr");
+      let csv = "";
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("th, td");
+        const rowData = [];
+        cells.forEach(cell => {
+          rowData.push(cell.textContent.trim());
+        });
+        csv += rowData.join(",") + "\n";
+      });
+      
+      const btn = createCopyButton(csv.trim());
+      btn.style.position = "absolute";
+      btn.style.top = "8px";
+      btn.style.left = "8px";
+      table.style.position = "relative";
+      table.style.paddingTop = "40px";
+      table.parentNode.style.position = "relative";
+      table.parentNode.insertBefore(btn, table);
+    });
     
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(bubble);
