@@ -38,6 +38,23 @@ function createCopyButton(text, parent) {
   return btn;
 }
 
+function highlightCode(bubble) {
+  bubble.querySelectorAll("pre code").forEach(block => {
+    // محاولة اكتشاف اللغة
+    const classes = block.className.split(" ");
+    const langClass = classes.find(c => c.startsWith("language-"));
+    const lang = langClass ? langClass.replace("language-", "") : '';
+    
+    // إذا اللغة غير موجودة أو غير مدعومة، حاول ن探测
+    if (!lang || !hljs.getLanguage(lang)) {
+      block.removeAttribute('class');
+      hljs.highlightElement(block);
+    } else {
+      hljs.highlightElement(block);
+    }
+  });
+}
+
 function addMessage(text, role, save = true) {
   const wrapper = document.createElement("div");
   wrapper.className = `message ${role}`;
@@ -47,6 +64,9 @@ function addMessage(text, role, save = true) {
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   bubble.innerHTML = marked.parse(text);
+
+  // تلوين الأكواد
+  highlightCode(bubble);
 
   // إضافة زر نسخ للأكواد
   bubble.querySelectorAll("pre").forEach(pre => {
@@ -89,6 +109,10 @@ function loadSavedMessages() {
     const bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.innerHTML = marked.parse(msg.text);
+    
+    // تلوين الأكواد للرسائل المحفوطة
+    highlightCode(bubble);
+    
     wrapper.append(avatar, bubble);
     messages.appendChild(wrapper);
   });
